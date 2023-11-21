@@ -26,6 +26,7 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        Route::pattern('numId', '[0-9]+'); // 全局約定
         $this->configureRateLimiting();
 
         $this->routes(function () {
@@ -35,6 +36,7 @@ class RouteServiceProvider extends ServiceProvider
 
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));
+          
         });
     }
 

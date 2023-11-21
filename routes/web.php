@@ -12,7 +12,9 @@ use App\Http\Controllers\TestController;
 | contains the "web" middleware group. Now create something great!
 |
 */
+// Route::redirect('hihi', 'any', 301); 9代這寫法不作用啊
 
+// 基礎篇
 Route::get('/', function () {
     return view('welcome');
 });
@@ -20,10 +22,10 @@ Route::get('/', function () {
 Route::get('hihi', function () {
     return 'hihiGet';
 });
-Route::get('param/{name}', function ($name) {
-    return 'hihiParam'.$name;
-});
-Route::post('hihi', function () {
+Route::get('param/{numId}', function ($numId) {
+    return 'hihiParam'.$numId;
+})->where('numId', '.*');
+Route::post('hihi', function () { // 避免419 前端要做CSRF令牌防護，除非後端關掉
     return 'hihiPost';
 });
 Route::any('any', function () {
@@ -33,7 +35,51 @@ Route::match(['get', 'post'],'match', function () {
     return 'hihiMatch';
 });
 
-Route::get('testctrl/{id}', [TestController::class, 'read']); // 得use
+// 正則篇
+Route::get('testctrl/{id}', [TestController::class, 'read'])->where('id', '[0-9]+'); // 得use
+// Route::get('testctrl/{id}', [TestController::class, 'read'])->where(['id'=>'[0-9]+']); // 數組
 
 // Route::get('testctrl２/{id}', 'App\Http\Controllers\TestController@read'); // 免use
 // 一個方法只能註冊一個路由？！
+
+// 命名篇
+Route::get('testctrl/{n}', [TestController::class, 'ro'])->name('nt');
+// 重定向先略
+
+// 分組篇
+Route::group(['prefix'=>'inner'], function () {
+  Route::get('member', function () {
+     return 'hihiMember';
+  });
+});
+
+// 等同
+// Route::prefix('inner')->group(function () {
+//   Route::get('member', function () {
+//      return 'hihiMember';
+//   });
+// });
+
+// 中間件
+// Route::middleware(['web.filter'])->group(function () {
+//   Route::get('member', function () {
+//      return 'hihiMember';
+//   });
+// });
+
+// 等同
+// Route::group(['middleware'=>'web.filter'], function () {
+//   Route::get('member', function () {
+//      return 'hihiMember';
+//   });
+// });
+
+// 還有子域名domain 命名空間等
+// as？
+
+// 回退
+
+Route::get('autoj', [TestController::class, 'autoJson']);
+
+// 資源控制器略
+// Route::resource('resource', 'App\Http\Controllers\ResourceController');
