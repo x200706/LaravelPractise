@@ -7,6 +7,7 @@ use Carbon\Carbon;
 
 class SumArrayTest extends TestCase
 {
+  // ./vendor/phpunit/phpunit/phpunit tests/Feature/SumArrayTest.php --group Feature/SumArrayTest
     /**
      * @group Feature/SumArrayTest
      */
