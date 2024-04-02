@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TestController;
+
+use Illuminate\Support\Facades\Mail;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -83,3 +85,17 @@ Route::get('autoj', [TestController::class, 'autoJson']);
 
 // 資源控制器略
 // Route::resource('resource', 'App\Http\Controllers\ResourceController');
+
+Route::get('sendmail', function () {
+  try {
+    Mail::raw('測試信內文', function ($message) {
+        $message
+        ->to('chi200706@mail.com')
+        ->subject('測試信標題');
+  });
+  } catch (\Exception $e) {
+    dump($e->getMessage());
+  }
+  // Mail::failures()在新版是過時的
+  return '寄信成功';
+});
