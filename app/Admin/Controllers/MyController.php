@@ -31,6 +31,14 @@ class MyController extends AdminController
   */
   protected function grid(){
     $grid = new Grid(new ChiikawaProfile());
+    
+    $grid->disableCreateButton(); // 禁用新增按鈕
+    $grid->disableActions(); // 禁用單行異動按鈕
+    $grid->disableFilter(); // 禁用漏斗
+    $grid->disableExport(); // 禁用匯出
+    $grid->disableRowSelector(); // 禁用選取
+    $grid->disableColumnSelector(); // 禁用像格子圖案的按鈕
+    
     $grid->tools(function (Grid\Tools $tools) {
        $tools->append(new ImportProfile());
     });
