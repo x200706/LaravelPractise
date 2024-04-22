@@ -5,22 +5,46 @@ namespace App\Admin\Actions\Chiikawa;
 use Encore\Admin\Actions\Action;
 use Illuminate\Http\Request;
 
+use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\ProfileImport;
+
 use App\Models\ChiikawaProfile;
+use Illuminate\Support\Facades\Log;
+
+use App\Service\DateConvertService;
 
 class ImportProfile extends Action
 {
     protected $selector = '.import-profile';
+    //
 
     public function handle(Request $request)
     {
-        $excel = $request->file('file');
-        // 存入DB
-        $sheet  = Excel::toArray(new ProfileImport(), $excel);
-        // 檢查是否合法
-        // forEach
+      $excel = $request->file('file');
+      // 存入DB
+      $sheet = Excel::toArray(new ProfileImport(), $excel);
+      $sheet = $sheet[0];
+      array_shift($sheet); // 去除表頭
 
-        return $this->response()->success('匯入小可愛資料完成！！')->refresh();
+      // forEach
+      foreach ($sheet as $row) {
+        $name = $row[0];
+        $dateConvertService = new DateConvertService();
+        $birthday = $dateConvertService->covertToDate($row[1]);
+        $sign = $row[2];
+        
+        // 檢查是否合法（略）
+
+        // 匯入DB
+        $data = array(
+          'name' => $name,
+          'birthday' => $birthday,
+          'sign' => $sign,
+        );
+        ChiikawaProfile::insert($data);
+      }
+ 
+      return $this->response()->success('匯入小可愛資料完成！！')->refresh();
     }
   
     public function form()
@@ -33,6 +57,6 @@ class ImportProfile extends Action
     {
         return <<<HTML
         <a class="btn btn-sm btn-default import-profile">匯入小可愛個人資料</a>
-HTML;
+        HTML;
     }
 }

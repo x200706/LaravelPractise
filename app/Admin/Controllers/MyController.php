@@ -42,6 +42,10 @@ class MyController extends AdminController
     $grid->tools(function (Grid\Tools $tools) {
        $tools->append(new ImportProfile());
     });
+
+    $grid->column('name', '姓名');
+    $grid->column('birthday', '生日')->sortable();;
+    $grid->column('sign', '星座');
     
     return $grid;
   }
