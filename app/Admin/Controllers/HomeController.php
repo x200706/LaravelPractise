@@ -10,6 +10,7 @@ use Encore\Admin\Layout\Row;
 
 class HomeController extends Controller
 {
+  // 內容模板教學：https://laravel-admin.org/docs/zh/1.x/content-layout
     public function index(Content $content)
     {
         return $content
