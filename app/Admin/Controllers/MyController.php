@@ -34,18 +34,24 @@ class MyController extends AdminController
     
     $grid->disableCreateButton(); // 禁用新增按鈕
     $grid->disableActions(); // 禁用單行異動按鈕
-    $grid->disableFilter(); // 禁用漏斗
-    $grid->disableExport(); // 禁用匯出
+    // $grid->disableFilter(); // 禁用漏斗
+    // $grid->disableExport(); // 禁用匯出
     $grid->disableRowSelector(); // 禁用選取
     $grid->disableColumnSelector(); // 禁用像格子圖案的按鈕
     
     $grid->tools(function (Grid\Tools $tools) {
        $tools->append(new ImportProfile());
     });
+    $grid->filter(function (Grid\Filter $filter) {
+      $filter->expand();
+    });
 
+    $grid->column('id', 'id');
     $grid->column('name', '姓名');
     $grid->column('birthday', '生日')->sortable();;
     $grid->column('sign', '星座');
+
+    // $grid->exporter(new \App\Exports\ProfileExport);
     
     return $grid;
   }
