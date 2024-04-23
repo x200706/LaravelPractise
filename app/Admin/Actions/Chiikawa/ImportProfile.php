@@ -16,7 +16,6 @@ use App\Service\DateConvertService;
 class ImportProfile extends Action
 {
     protected $selector = '.import-profile';
-    //
 
     public function handle(Request $request)
     {
