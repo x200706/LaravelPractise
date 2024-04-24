@@ -12,6 +12,7 @@ use Encore\Admin\Layout\Row;
 use Encore\Admin\Grid;
 
 use App\Admin\Actions\Chiikawa\ImportProfile;
+use App\Admin\Actions\Chiikawa\ExportProfile;;
 use App\Models\ChiikawaProfile;
 
 class MyController extends AdminController
@@ -51,7 +52,7 @@ class MyController extends AdminController
     $grid->column('birthday', '生日')->sortable();;
     $grid->column('sign', '星座');
 
-    // $grid->exporter(new \App\Exports\ProfileExport);
+    $grid->exporter(new ExportProfile);
     
     return $grid;
   }
