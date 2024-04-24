@@ -43,9 +43,15 @@ class MyController extends AdminController
     $grid->tools(function (Grid\Tools $tools) {
        $tools->append(new ImportProfile());
     });
+    
     $grid->filter(function (Grid\Filter $filter) {
       $filter->expand();
+      $filter->disableIdFilter();
+      $filter->between('birthday', '日期')->datetime();
     });
+
+    // 展開有新版寫法<-Uhmm不過大部分都會做自己的搜尋器吧？！還是會需要上面那個函數啊
+    // $grid->expandFilter();
 
     $grid->column('id', 'id');
     $grid->column('name', '姓名');
