@@ -3,6 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Log;
 
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Controllers\Dashboard;
@@ -31,7 +32,7 @@ class MyController extends AdminController
   * @return Grid
   */
   protected function grid(){
-    /* 這樣SQL是對的!! 但是各種ORM寫法用到$grid->model就會爛掉<-20240426原因出在沒有好好select欄位，selectRaw('*')會爛掉
+    /* 這樣SQL是對的（ORM查也正常）!! 但是各種ORM寫法用到$grid->model下方就會爛掉<-原因出在$grid->model不知何故得好好select欄位，selectRaw('*')會爛掉...
      select 
      chiikawa_profile.id,
      chiikawa_profile.created_at,
@@ -44,24 +45,103 @@ class MyController extends AdminController
      left join sign_lucky_color on chiikawa_profile.sign = sign_lucky_color.sign
      left join sign_lucky_jewelry on chiikawa_profile.sign = sign_lucky_jewelry.sign
      order by chiikawa_profile.id asc
-
-     另外result的merge是關於collection；還有union應該也是能用的，只是沒有好好select就容易爛掉
      */
-    
+
+    // 不服來辯 SQL打印測試
+    // $sql = ChiikawaProfile::selectRaw('
+    //   chiikawa_profile.id,
+    //   chiikawa_profile.created_at,
+    //   chiikawa_profile.name,
+    //   chiikawa_profile.birthday,
+    //   chiikawa_profile.sign,
+    //   sign_lucky_color.lucky_color,
+    //   sign_lucky_jewelry.lucky_jewelry')
+    //     ->leftJoin('sign_lucky_color', 'chiikawa_profile.sign', '=', 'sign_lucky_color.sign')
+    //     ->leftJoin('sign_lucky_jewelry', 'chiikawa_profile.sign', '=', 'sign_lucky_jewelry.sign')->toSql();
+    // Log::info($sql);
+
+    // $suspected_wrong_sql = ChiikawaProfile::selectRaw('*')
+    //     ->leftJoin('sign_lucky_color', 'chiikawa_profile.sign', '=', 'sign_lucky_color.sign')
+    //     ->leftJoin('sign_lucky_jewelry', 'chiikawa_profile.sign', '=', 'sign_lucky_jewelry.sign')->toSql();
+    // Log::info($suspected_wrong_sql);
+
     $grid = new Grid(new ChiikawaProfile());
-    $grid->model()->selectRaw('
+    // 下面這樣寫資料會亂掉（不分原生/ORM/grid model）
+    // 先說下情境好了 寶石表跟顏色表都有個同名欄位，只會在一張表出現，現在要讓這個合併的欄位顯示進grid（更：其實用left join理論上應該要能可以，可是grid又再搞，就想說試試看union....）
+    // $another_result = ChiikawaProfile::selectRaw('
+    //   chiikawa_profile.id,
+    //   chiikawa_profile.created_at,
+    //   chiikawa_profile.name,
+    //   chiikawa_profile.birthday,
+    //   chiikawa_profile.sign,
+    //   sign_lucky_color.lucky_color,
+    //   sign_lucky_color.same_name_col as same_name_col')
+    //     ->leftJoin('sign_lucky_color', 'chiikawa_profile.sign', '=', 'sign_lucky_color.sign');
+    
+    // $grid->model()->selectRaw('
+    // DISTINCT chiikawa_profile.id,
+    // chiikawa_profile.created_at,
+    // chiikawa_profile.name,
+    // chiikawa_profile.birthday,
+    // chiikawa_profile.sign,
+    // sign_lucky_jewelry.lucky_jewelry,
+    // sign_lucky_jewelry.same_name_col as same_name_col')
+    //   ->leftJoin('sign_lucky_jewelry', 'chiikawa_profile.sign', '=', 'sign_lucky_jewelry.sign')
+    //   ->union($another_result);
+    // 以上區段查詢結果異常原因是UNION的特性 https://www.cnblogs.com/buwuliao/p/11121352.html
+    
+    // 補充去重：unique是用來處理collection的..；真要用可能試試->distinct()
+
+    // 另外這樣也會壞掉......
+    // $grid->model()->selectRaw('
+    // chiikawa_profile.id,
+    // chiikawa_profile.created_at,
+    // chiikawa_profile.name,
+    // chiikawa_profile.birthday,
+    // chiikawa_profile.sign,
+    // sign_lucky_jewelry.lucky_jewelry,
+    // sign_lucky_jewelry.same_name_col,
+    // sign_lucky_color.lucky_color,
+    // sign_lucky_color.same_name_col')
+    //   ->leftJoin('sign_lucky_jewelry', 'chiikawa_profile.sign', '=', 'sign_lucky_jewelry.sign')
+    //   ->leftJoin('sign_lucky_color', 'chiikawa_profile.sign', '=', 'sign_lucky_color.sign');
+    // 可是SQL可以這樣寫，我!~!%#^~!#@
+    /*
+    select 
     chiikawa_profile.id,
     chiikawa_profile.created_at,
     chiikawa_profile.name,
     chiikawa_profile.birthday,
     chiikawa_profile.sign,
+    sign_lucky_jewelry.lucky_jewelry,
+    sign_lucky_jewelry.same_name_col,
     sign_lucky_color.lucky_color,
-    sign_lucky_jewelry.lucky_jewelry')
-      ->leftJoin('sign_lucky_color', 'chiikawa_profile.sign', '=', 'sign_lucky_color.sign')
-      ->leftJoin('sign_lucky_jewelry', 'chiikawa_profile.sign', '=', 'sign_lucky_jewelry.sign');
-
+    sign_lucky_color.same_name_col
+    from chiikawa_profile 
+    left join sign_lucky_color on chiikawa_profile.sign = sign_lucky_color.sign
+    left join sign_lucky_jewelry on chiikawa_profile.sign = sign_lucky_jewelry.sign
+    order by chiikawa_profile.id asc -- 出來結果可正常咪怒
+    */
+    // 而且ORM語法查出來也是對的 就grid model的都會壞掉 暈
+    // $suspected_strange_result = ChiikawaProfile::selectRaw('
+    //   chiikawa_profile.id,
+    //   chiikawa_profile.created_at,
+    //   chiikawa_profile.name,
+    //   chiikawa_profile.birthday,
+    //   chiikawa_profile.sign,
+    //   sign_lucky_jewelry.lucky_jewelry,
+    //   sign_lucky_jewelry.same_name_col,
+    //   sign_lucky_color.lucky_color,
+    //   sign_lucky_color.same_name_col')
+    //     ->leftJoin('sign_lucky_jewelry', 'chiikawa_profile.sign', '=', 'sign_lucky_jewelry.sign')
+    //     ->leftJoin('sign_lucky_color', 'chiikawa_profile.sign', '=', 'sign_lucky_color.sign')->orderBy('created_at','asc')->get();
+    // Log::info($suspected_strange_result);
+    
     // 備註 $grid->setData是直接塞入指定欄位
     // setTable裡面如果傳入查詢結果會加太多""然後拋錯（待還原）
+    // 這麼麻煩...有朋友建議我弄個視圖幫它建個Model接過來算了
+    // https://github.com/z-song/laravel-admin/issues/4998 網友說你直接下raw sqlㄅ
+    // 夾縫中求生存Orz|||
     
     $grid->disableCreateButton(); // 禁用新增按鈕
     $grid->disableActions(); // 禁用單行異動按鈕
@@ -89,6 +169,7 @@ class MyController extends AdminController
     $grid->column('sign', '星座');
     $grid->column('lucky_color', '2024星座幸運色');
     $grid->column('lucky_jewelry', '2024星座幸運寶石');
+    $grid->column('same_name_col', '同名但只會有其中一張表有的欄位');
 
     $grid->exporter(new ExportProfile);
     
