@@ -135,6 +135,7 @@ class MyController extends AdminController
     //   sign_lucky_color.same_name_col')
     //     ->leftJoin('sign_lucky_jewelry', 'chiikawa_profile.sign', '=', 'sign_lucky_jewelry.sign')
     //     ->leftJoin('sign_lucky_color', 'chiikawa_profile.sign', '=', 'sign_lucky_color.sign')->orderBy('created_at','asc')->get();
+    // $grid->setTable($suspected_strange_result); // 可能會有問題？
     // Log::info($suspected_strange_result);
     
     // 備註 $grid->setData是直接塞入指定欄位
@@ -167,9 +168,14 @@ class MyController extends AdminController
     $grid->column('name', '姓名');
     $grid->column('birthday', '生日')->sortable();;
     $grid->column('sign', '星座');
-    $grid->column('lucky_color', '2024星座幸運色');
-    $grid->column('lucky_jewelry', '2024星座幸運寶石');
-    $grid->column('same_name_col', '同名但只會有其中一張表有的欄位');
+    // $grid->column('lucky_color', '2024星座幸運色');
+    // $grid->column('lucky_jewelry', '2024星座幸運寶石');
+    // $grid->column('same_name_col', '同名但只會有其中一張表有的欄位');
+    // 解決leftjoin顯示不理想問題：
+    // 以上關聯欄位在Model那邊設置一對一方法，
+    // 然後在這邊用display寫匿名方法，裡面的$this就會是當前Model，去呼那個方法return那個值 
+    // 如果要兩張表取有資料那張，可以寫?? null判斷式
+    // 在其他地方寫成功過了－至少這樣取值跟顯示是不會出錯-.-
 
     $grid->exporter(new ExportProfile);
     
