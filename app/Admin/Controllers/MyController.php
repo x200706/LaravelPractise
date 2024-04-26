@@ -31,7 +31,36 @@ class MyController extends AdminController
   * @return Grid
   */
   protected function grid(){
+    /* 這樣SQL是對的!! 但是各種ORM寫法用到$grid->model就會爛掉<-20240426原因出在沒有好好select欄位，selectRaw('*')會爛掉
+     select 
+     chiikawa_profile.id,
+     chiikawa_profile.created_at,
+     chiikawa_profile.name,
+     chiikawa_profile.birthday,
+     chiikawa_profile.sign,
+     sign_lucky_color.lucky_color,
+     sign_lucky_jewelry.lucky_jewelry
+     from chiikawa_profile 
+     left join sign_lucky_color on chiikawa_profile.sign = sign_lucky_color.sign
+     left join sign_lucky_jewelry on chiikawa_profile.sign = sign_lucky_jewelry.sign
+     order by chiikawa_profile.id asc
+
+     另外result的merge是關於collection；還有union應該也是能用的，只是沒有好好select就容易爛掉
+     */
+    
     $grid = new Grid(new ChiikawaProfile());
+    $grid->model()->selectRaw('
+    chiikawa_profile.id,
+    chiikawa_profile.created_at,
+    chiikawa_profile.name,
+    chiikawa_profile.birthday,
+    chiikawa_profile.sign,
+    sign_lucky_color.lucky_color,
+    sign_lucky_jewelry.lucky_jewelry')
+      ->leftJoin('sign_lucky_color', 'chiikawa_profile.sign', '=', 'sign_lucky_color.sign')
+      ->leftJoin('sign_lucky_jewelry', 'chiikawa_profile.sign', '=', 'sign_lucky_jewelry.sign');
+
+    // 備註 $grid->setData是直接塞入指定欄位
     
     $grid->disableCreateButton(); // 禁用新增按鈕
     $grid->disableActions(); // 禁用單行異動按鈕
@@ -57,6 +86,8 @@ class MyController extends AdminController
     $grid->column('name', '姓名');
     $grid->column('birthday', '生日')->sortable();;
     $grid->column('sign', '星座');
+    $grid->column('lucky_color', '2024星座幸運色');
+    $grid->column('lucky_jewelry', '2024星座幸運寶石');
 
     $grid->exporter(new ExportProfile);
     
