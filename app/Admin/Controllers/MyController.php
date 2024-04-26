@@ -61,6 +61,7 @@ class MyController extends AdminController
       ->leftJoin('sign_lucky_jewelry', 'chiikawa_profile.sign', '=', 'sign_lucky_jewelry.sign');
 
     // 備註 $grid->setData是直接塞入指定欄位
+    // setTable裡面如果傳入查詢結果會加太多""然後拋錯（待還原）
     
     $grid->disableCreateButton(); // 禁用新增按鈕
     $grid->disableActions(); // 禁用單行異動按鈕
