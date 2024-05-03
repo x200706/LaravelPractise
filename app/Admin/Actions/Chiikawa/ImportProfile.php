@@ -38,6 +38,10 @@ class ImportProfile extends Action
         $name = $row[0];
         $dateConvertService = new DateConvertService();
         $birthday = $dateConvertService->covertToDate($row[1]);
+        
+        // 可以這樣用嗎..？不行 會說non static method
+        // $birthday = DateConvertService::covertToDate($row[1]);
+        
         // 如果用建構子注入..
         // $birthday = $this->dateConvertService->covertToDate($row[1]); // 注意!!調用注入的物件可不要加$號啊
         $sign = $row[2];
