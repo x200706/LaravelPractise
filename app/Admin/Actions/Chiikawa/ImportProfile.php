@@ -24,6 +24,7 @@ class ImportProfile extends Action
     // ){
     //     $this->dateConvertService = $dateConvertService;
     // } // 這邊不是建構子注入不能用，是你失去了空參數建構子，那別處如果不是注入而是調用時得傳個東西進來吧->但這邊似乎還真的不能用 會讓工具失效............
+  // https://github.com/z-song/laravel-admin/blob/master/src/Actions/Action.php
 
     public function handle(Request $request)
     {
