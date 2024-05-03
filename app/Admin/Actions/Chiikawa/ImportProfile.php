@@ -17,13 +17,13 @@ class ImportProfile extends Action
 {
     protected $selector = '.import-profile';
 
-    // // DI注入Service
+    // DI注入Service
     // protected $dateConvertService;
     // public function __construct(
     //   DateConvertService $dateConvertService
     // ){
-    //     $this->DateConvertService = $dateConvertService;
-    // } // 這邊不是建構子注入不能用，是你失去了空參數建構子，那別處調用時得傳個東西進來吧
+    //     $this->dateConvertService = $dateConvertService;
+    // } // 這邊不是建構子注入不能用，是你失去了空參數建構子，那別處如果不是注入而是調用時得傳個東西進來吧->但這邊似乎還真的不能用 會讓工具失效............
 
     public function handle(Request $request)
     {
@@ -38,6 +38,8 @@ class ImportProfile extends Action
         $name = $row[0];
         $dateConvertService = new DateConvertService();
         $birthday = $dateConvertService->covertToDate($row[1]);
+        // 如果用建構子注入..
+        // $birthday = $this->dateConvertService->covertToDate($row[1]); // 注意!!調用注入的物件可不要加$號啊
         $sign = $row[2];
         
         // 檢查是否合法（略）

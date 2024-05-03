@@ -16,6 +16,8 @@ use App\Admin\Actions\Chiikawa\ImportProfile;
 use App\Admin\Actions\Chiikawa\ExportProfile;;
 use App\Models\ChiikawaProfile;
 
+use App\Service\DateConvertService;
+
 class MyController extends AdminController
 { // 修改不用重新run欸
 
@@ -26,14 +28,16 @@ class MyController extends AdminController
   */
   protected $title = '我的測試頁面';
 
- // // DI注入
+ // DI注入
  // protected $importProfile;
- // public function __construct(
- //   ImportProfile $importProfile
- // ){
- //     $this->ImportProfile = $importProfile;
- // }
-
+ protected $dateConvertService;
+ public function __construct(
+   // ImportProfile $importProfile
+   DateConvertService $dateConvertService
+ ){
+     // $this->importProfile = $importProfile;
+     $this->dateConvertService = $dateConvertService;
+ }
 
  /**
   * Make a grid builder.
@@ -161,10 +165,16 @@ class MyController extends AdminController
     $grid->disableRowSelector(); // 禁用選取
     $grid->disableColumnSelector(); // 禁用像格子圖案的按鈕
 
-    // // 這邊順便演示匿名函數中想用當前類的做法
+    // 這邊順便演示匿名函數中想用當前類的做法
     // $grid->tools(function (Grid\Tools $tools) use ($call)  {
-    //    $tools->append($call->$importProfile); // 如果該Service/Action建構子有東西 但又不想傳 一脈相傳的注入能解嗎？<-結果這樣寫就當掉了一直轉圈=_=
+    //    $tools->append($call->importProfile); // 如果該Service/Action建構子有東西 但又不想傳 一脈相傳的注入能解嗎？->可以的！ 不過這邊牽涉到Excel套件相關問題，又延伸出其他例外.....
+    // 這東西得是顯示傳遞https://github.com/SpartnerNL/Laravel-Excel/issues/2201
     // });
+    
+    // $grid->tools(function (Grid\Tools $tools) use ($call) {
+    //    $tools->append(new ImportProfile($call->dateConvertService));
+    // }); // 這樣也不能化解...會出現跟上方issues/2201一樣的錯誤，會不會是這份Action還真的不可以注入東西，感覺有甚麼判斷壞掉了!$@%!# 再繼續修效益不大
+
     $grid->tools(function (Grid\Tools $tools) {
        $tools->append(new ImportProfile());
     });
