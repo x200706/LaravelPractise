@@ -26,12 +26,22 @@ class MyController extends AdminController
   */
   protected $title = '我的測試頁面';
 
+ // // DI注入
+ // protected $importProfile;
+ // public function __construct(
+ //   ImportProfile $importProfile
+ // ){
+ //     $this->ImportProfile = $importProfile;
+ // }
+
+
  /**
   * Make a grid builder.
   *
   * @return Grid
   */
   protected function grid(){
+    $call = $this;
     /* 這樣SQL是對的（ORM查也正常）!! 但是各種ORM寫法用到$grid->model下方就會爛掉<-原因出在$grid->model不知何故得好好select欄位，selectRaw('*')會爛掉...
      select 
      chiikawa_profile.id,
@@ -150,7 +160,11 @@ class MyController extends AdminController
     // $grid->disableExport(); // 禁用匯出
     $grid->disableRowSelector(); // 禁用選取
     $grid->disableColumnSelector(); // 禁用像格子圖案的按鈕
-    
+
+    // // 這邊順便演示匿名函數中想用當前類的做法
+    // $grid->tools(function (Grid\Tools $tools) use ($call)  {
+    //    $tools->append($call->$importProfile); // 如果該Service/Action建構子有東西 但又不想傳 一脈相傳的注入能解嗎？<-結果這樣寫就當掉了一直轉圈=_=
+    // });
     $grid->tools(function (Grid\Tools $tools) {
        $tools->append(new ImportProfile());
     });

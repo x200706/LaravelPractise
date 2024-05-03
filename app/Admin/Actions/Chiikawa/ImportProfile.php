@@ -17,6 +17,14 @@ class ImportProfile extends Action
 {
     protected $selector = '.import-profile';
 
+    // // DI注入Service
+    // protected $dateConvertService;
+    // public function __construct(
+    //   DateConvertService $dateConvertService
+    // ){
+    //     $this->DateConvertService = $dateConvertService;
+    // } // 這邊不是建構子注入不能用，是你失去了空參數建構子，那別處調用時得傳個東西進來吧
+
     public function handle(Request $request)
     {
       $excel = $request->file('file');
