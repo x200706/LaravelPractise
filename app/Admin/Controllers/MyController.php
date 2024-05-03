@@ -29,13 +29,13 @@ class MyController extends AdminController
   protected $title = '我的測試頁面';
 
  // DI注入
- // protected $importProfile;
+ protected $importProfile;
  protected $dateConvertService;
  public function __construct(
-   // ImportProfile $importProfile
+   ImportProfile $importProfile,
    DateConvertService $dateConvertService
  ){
-     // $this->importProfile = $importProfile;
+     $this->importProfile = $importProfile;
      $this->dateConvertService = $dateConvertService;
  }
 
@@ -166,18 +166,18 @@ class MyController extends AdminController
     $grid->disableColumnSelector(); // 禁用像格子圖案的按鈕
 
     // 這邊順便演示匿名函數中想用當前類的做法
-    // $grid->tools(function (Grid\Tools $tools) use ($call)  {
-    //    $tools->append($call->importProfile); // 如果該Service/Action建構子有東西 但又不想傳 一脈相傳的注入能解嗎？->可以的！ 不過這邊牽涉到Excel套件相關問題，又延伸出其他例外.....
-    // 這東西得是顯示傳遞https://github.com/SpartnerNL/Laravel-Excel/issues/2201
-    // });
+    $grid->tools(function (Grid\Tools $tools) use ($call)  {
+       $tools->append($call->importProfile); // 如果該Service/Action建構子有東西 但又不想傳 一脈相傳的注入能解嗎？->可以的！ 不過這邊牽涉到Excel套件相關問題，又延伸出其他例外.....
+    // 這東西得是顯式傳遞https://github.com/SpartnerNL/Laravel-Excel/issues/2201
+    });
     
     // $grid->tools(function (Grid\Tools $tools) use ($call) {
     //    $tools->append(new ImportProfile($call->dateConvertService));
-    // }); // 這樣也不能化解...會出現跟上方issues/2201一樣的錯誤，會不會是這份Action還真的不可以注入東西，感覺有甚麼判斷壞掉了!$@%!# 再繼續修效益不大
+    // }); // 這樣也不能化解...會出現跟上方issues/2201一樣的錯誤，會不會是這份Action還真的不可以注入東西，感覺有甚麼判斷壞掉了!$@%!# <-答案是Admin Action沒吃到父類建構子ㄛ
 
-    $grid->tools(function (Grid\Tools $tools) {
-       $tools->append(new ImportProfile());
-    });
+    // $grid->tools(function (Grid\Tools $tools) {
+    //    $tools->append(new ImportProfile());
+    // });
     
     $grid->filter(function (Grid\Filter $filter) {
       $filter->expand();
